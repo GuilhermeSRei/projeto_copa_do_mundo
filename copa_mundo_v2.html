@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Copa do Mundo — Tabuleiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080e1a;
+  --surface:#0f1825;
+  --surface2:#162033;
+  --surface3:#1d2a40;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.14);
+  --gold:#f0b429;
+  --gold-soft:rgba(240,180,41,0.12);
+  --green:#22c55e;
+  --green-soft:rgba(34,197,94,0.12);
+  --red:#ef4444;
+  --red-soft:rgba(239,68,68,0.12);
+  --blue:#3b82f6;
+  --blue-soft:rgba(59,130,246,0.12);
+  --purple:#a855f7;
+  --purple-soft:rgba(168,85,247,0.12);
+  --cyan:#06b6d4;
+  --cyan-soft:rgba(6,182,212,0.12);
+  --text:#e8edf5;
+  --text2:#8b9ab0;
+  --text3:#4d5d73;
+  --r:12px;
+  --r2:18px;
+  --r3:24px;
+}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+
+/* ── UTILS ── */
+.hidden{display:none!important}
+.flex{display:flex}
+.col{flex-direction:column}
+.center{align-items:center;justify-content:center}
+.gap4{gap:4px}.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}.gap16{gap:16px}.gap20{gap:20px}
+.w100{width:100%}
+.bold{font-weight:600}
+.mono{font-family:'Archivo Black',sans-serif}
+
+/* ── TYPOGRAPHY ── */
+.heading{font-family:'Archivo Black',sans-serif;line-height:1.1}
+.h1{font-size:clamp(2.2rem,7vw,4.5rem)}
+.h2{font-size:clamp(1.4rem,4vw,2.2rem)}
+.h3{font-size:clamp(1rem,2.5vw,1.4rem)}
+.label{font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all 0.18s cubic-bezier(.4,0,.2,1);white-space:nowrap;outline:none}
+.btn-lg{padding:14px 32px;font-size:1rem}
+.btn-md{padding:10px 22px;font-size:0.9rem}
+.btn-sm{padding:7px 16px;font-size:0.8rem}
+.btn-xs{padding:5px 12px;font-size:0.75rem}
+
+.btn-gold{background:var(--gold);color:#000;box-shadow:0 0 0 0 rgba(240,180,41,0.4)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(240,180,41,0.35)}
+.btn-gold:active{transform:translateY(0)}
+
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--surface3);border-color:rgba(255,255,255,0.22)}
+
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover{filter:brightness(1.1);transform:translateY(-1px)}
+
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{filter:brightness(1.1)}
+
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
+
+.btn:disabled{opacity:0.38;cursor:not-allowed;transform:none!important}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2)}
+.card-inner{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r)}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:50px;font-size:0.7rem;font-weight:600;letter-spacing:0.04em}
+.badge-gold{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(240,180,41,0.25)}
+.badge-green{background:var(--green-soft);color:var(--green);border:1px solid rgba(34,197,94,0.25)}
+.badge-blue{background:var(--blue-soft);color:#60a5fa;border:1px solid rgba(59,130,246,0.25)}
+.badge-purple{background:var(--purple-soft);color:#c084fc;border:1px solid rgba(168,85,247,0.25)}
+.badge-red{background:var(--red-soft);color:#f87171;border:1px solid rgba(239,68,68,0.25)}
+.badge-cyan{background:var(--cyan-soft);color:var(--cyan);border:1px solid rgba(6,182,212,0.25)}
+
+/* ── SCREENS ── */
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.5rem 1rem;animation:fadeUp 0.35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HOME ── */
+.home-bg{background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(34,197,94,0.13) 0%,transparent 65%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(240,180,41,0.07) 0%,transparent 60%),var(--bg)}
+.home-hero{text-align:center;max-width:560px;padding-top:clamp(2rem,8vh,5rem)}
+.trophy-wrap{width:90px;height:90px;background:linear-gradient(135deg,var(--gold-soft),rgba(240,180,41,0.05));border:1px solid rgba(240,180,41,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.6rem;position:relative}
+.trophy-wrap::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(240,180,41,0.08);animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.home-tagline{color:var(--text2);font-size:clamp(0.9rem,2.5vw,1.1rem);margin-top:0.75rem;font-weight:400}
+.home-actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;margin:2.5rem auto 2rem}
+.home-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:400px;margin:0 auto}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center}
+.stat-val{font-family:'Archivo Black',sans-serif;font-size:1.3rem;color:var(--gold)}
+.stat-key{font-size:0.68rem;color:var(--text2);font-weight:500;margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
+.cell-legend{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:1.5rem;max-width:380px}
+.legend-item{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:4px 12px;font-size:0.72rem;color:var(--text2)}
+
+/* ── SETUP ── */
+.setup-wrap{width:100%;max-width:480px;padding-top:1rem}
+.step-bar{display:flex;gap:6px;margin-bottom:2rem}
+.step-dot{height:4px;border-radius:2px;flex:1;background:var(--surface3);transition:background 0.3s}
+.step-dot.done{background:var(--green)}
+.step-dot.active{background:var(--gold)}
+.num-sel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.5rem 0}
+.num-btn{padding:18px;border-radius:var(--r);border:2px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:'Archivo Black',sans-serif;font-size:1.8rem;transition:all 0.18s}
+.num-btn.active{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
+.name-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.18s}
+.name-input:focus{border-color:rgba(240,180,41,0.5)}
+.player-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.player-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Archivo Black',sans-serif;font-size:0.8rem;flex-shrink:0}
+.country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;max-height:340px;overflow-y:auto;padding-right:4px;margin:1rem 0}
+.country-grid::-webkit-scrollbar{width:4px}
+.country-grid::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+.country-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;transition:all 0.18s;text-align:center;color:var(--text2)}
+.country-card:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);color:var(--text);transform:translateY(-2px)}
+.country-card.sel{border-color:var(--green);background:var(--green-soft);color:var(--text)}
+.country-card:disabled{opacity:0.35;cursor:not-allowed;pointer-events:none}
+.country-flag{font-size:1.7rem;margin-bottom:5px;line-height:1}
+.country-name{font-size:0.72rem;font-weight:600}
+
+/* ── GAME ── */
+.game-layout{display:grid;grid-template-columns:1fr;gap:12px;width:100%;max-width:900px;padding-top:0.5rem}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:900px;margin-bottom:0.5rem;flex-wrap:wrap;gap:8px}
+.topbar-brand{font-family:'Archivo Black',sans-serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.05em;display:flex;align-items:center;gap:8px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.turn-pill{background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:5px 14px;font-size:0.8rem;color:var(--text2);font-weight:500}
+
+/* Board */
+.board-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:10px;overflow:hidden}
+.board-grid{display:grid;gap:3px}
+.board-row{display:grid;gap:3px}
+.cell{border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;aspect-ratio:1;min-width:0;overflow:hidden;cursor:default;transition:transform 0.15s;user-select:none}
+.cell:hover{transform:scale(1.06);z-index:3}
+.cell-n{background:#132b1a;border:1px solid #0e2114}
+.cell-start{background:linear-gradient(135deg,#92400e,#78350f);border:1px solid #b45309}
+.cell-finish{background:linear-gradient(135deg,#854d0e,#713f12);border:1px solid var(--gold)}
+.cell-quiz{background:linear-gradient(135deg,#1e3a5f,#172d4a);border:1px solid rgba(59,130,246,0.5)}
+.cell-bonus{background:linear-gradient(135deg,#14532d,#0f3d21);border:1px solid rgba(34,197,94,0.45)}
+.cell-penalty{background:linear-gradient(135deg,#7f1d1d,#5c1a1a);border:1px solid rgba(239,68,68,0.45)}
+.cell-wild{background:linear-gradient(135deg,#4c1d95,#3b1278);border:1px solid rgba(168,85,247,0.45)}
+.cell-dribble{background:linear-gradient(135deg,#134e4a,#0f3d39);border:1px solid rgba(6,182,212,0.45)}
+.cell-icon{font-size:clamp(0.6rem,1.6vw,1rem);line-height:1;pointer-events:none}
+.cell-num{font-size:clamp(0.38rem,0.9vw,0.56rem);color:rgba(255,255,255,0.22);font-weight:600;pointer-events:none}
+.tokens-layer{position:absolute;inset:1px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1px;pointer-events:none}
+.token{border-radius:50%;border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 1px 6px rgba(0,0,0,0.7);flex-shrink:0;transition:all 0.35s cubic-bezier(.4,0,.2,1)}
+
+/* Player strip */
+.players-strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;width:100%}
+.players-strip::-webkit-scrollbar{height:3px}
+.players-strip::-webkit-scrollbar-thumb{background:var(--surface3)}
+.pcard{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:50px;padding:7px 14px 7px 7px;flex-shrink:0;transition:all 0.2s}
+.pcard.current{border-color:var(--gold);background:rgba(240,180,41,0.07)}
+.pcard.current .pname{color:var(--gold)}
+.pdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
+.pname{font-size:0.82rem;font-weight:600;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pscore{font-family:'Archivo Black',sans-serif;font-size:0.78rem;color:var(--gold);margin-left:2px}
+
+/* Control bar */
+.control-bar{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1rem 1.25rem}
+.current-info{flex:1}
+.current-label{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px}
+.current-player{display:flex;align-items:center;gap:10px}
+.current-flag{font-size:1.8rem;line-height:1}
+.current-name{font-weight:700;font-size:1rem}
+.current-meta{font-size:0.75rem;color:var(--text2);margin-top:1px}
+.dice-area{display:flex;align-items:center;gap:10px}
+.dice-face{font-size:2.4rem;line-height:1;min-width:36px;text-align:center;transition:all 0.1s}
+.dice-btn{width:62px;height:62px;background:var(--surface2);border:2px solid var(--border2);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;transition:all 0.18s;user-select:none}
+.dice-btn:hover:not(.spinning){border-color:var(--gold);background:var(--gold-soft);transform:rotate(8deg)}
+.dice-btn.spinning{animation:diceRoll 0.08s linear infinite;border-color:var(--gold)}
+@keyframes diceRoll{0%{transform:rotate(0)}50%{transform:rotate(12deg)}100%{transform:rotate(-8deg)}}
+
+/* Scoreboard */
+.scoreboard{display:grid;gap:6px}
+.score-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;transition:border-color 0.2s}
+.score-row.lead{border-color:rgba(240,180,41,0.3)}
+.score-rank{font-family:'Archivo Black',sans-serif;font-size:0.85rem;color:var(--text3);min-width:20px}
+.score-flag{font-size:1.1rem}
+.score-name{flex:1;font-weight:600;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-pts{font-family:'Archivo Black',sans-serif;font-size:0.9rem;color:var(--gold)}
+.score-pos{font-size:0.7rem;color:var(--text3)}
+.progress-track{background:var(--surface3);border-radius:2px;height:3px;flex:1;max-width:80px}
+.progress-fill{background:linear-gradient(90deg,var(--green),var(--cyan));height:100%;border-radius:2px;transition:width 0.4s ease}
+
+/* Quiz panel */
+.quiz-panel{background:var(--surface);border:1.5px solid rgba(59,130,246,0.3);border-radius:var(--r2);padding:1.25rem;animation:fadeUp 0.25s ease}
+.quiz-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.quiz-q{font-weight:600;font-size:clamp(0.9rem,2.5vw,1.05rem);line-height:1.45;margin-bottom:14px;color:var(--text)}
+.quiz-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.opt-btn{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 16px;text-align:left;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.18s;line-height:1.35;display:flex;align-items:center;gap:10px}
+.opt-btn::before{content:attr(data-letter);width:22px;height:22px;border-radius:6px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--text2);flex-shrink:0;transition:all 0.18s}
+.opt-btn:hover:not(:disabled){border-color:#60a5fa;background:var(--blue-soft)}
+.opt-btn:hover:not(:disabled)::before{background:var(--blue-soft);border-color:#60a5fa;color:#60a5fa}
+.opt-btn.correct{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+.opt-btn.correct::before{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-soft);color:#f87171}
+.opt-btn.wrong::before{background:var(--red-soft);border-color:var(--red);color:#f87171}
+.opt-btn:disabled{cursor:not-allowed}
+
+/* AI loading */
+.ai-loading{display:flex;align-items:center;gap:12px;padding:1.2rem}
+.ai-pulse{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;animation:aiPulse 1.4s ease-in-out infinite}
+@keyframes aiPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:0.7}}
+
+/* Toast */
+.toast-wrap{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--surface3);border:1px solid var(--border2);border-radius:50px;padding:9px 20px;font-size:0.88rem;font-weight:600;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.5);animation:toastIn 0.25s ease}
+@keyframes toastIn{from{transform:translateY(-12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.good{border-color:rgba(34,197,94,0.4);color:var(--green)}
+.toast.bad{border-color:rgba(239,68,68,0.4);color:#f87171}
+.toast.info{border-color:rgba(240,180,41,0.35);color:var(--gold)}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:400;padding:1rem;backdrop-filter:blur(8px)}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);padding:2rem;max-width:460px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.7);animation:modalIn 0.28s cubic-bezier(.34,1.3,.64,1)}
+@keyframes modalIn{from{transform:scale(0.88) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-icon{font-size:3rem;text-align:center;margin-bottom:1rem}
+.modal-title{font-family:'Archivo Black',sans-serif;font-size:1.7rem;text-align:center;letter-spacing:0.03em;margin-bottom:4px}
+.modal-sub{text-align:center;color:var(--text2);font-size:0.9rem;margin-bottom:1.5rem}
+.modal-divider{height:1px;background:var(--border);margin:1.25rem 0}
+
+/* Ranking */
+.rank-screen{width:100%;max-width:520px;padding-top:1rem}
+.rank-item{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;transition:border-color 0.2s}
+.rank-item:hover{border-color:var(--border2)}
+.rank-medal{font-size:1.2rem;min-width:26px;text-align:center}
+.rank-flag{font-size:1.3rem}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-weight:700;font-size:0.9rem}
+.rank-meta{font-size:0.72rem;color:var(--text2);margin-top:1px}
+.rank-pts{font-family:'Archivo Black',sans-serif;color:var(--gold);font-size:0.9rem}
+
+/* Cell tooltip */
+.cell-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:0.72rem;font-weight:600;white-space:nowrap;pointer-events:none;z-index:20;opacity:0;transition:opacity 0.15s;color:var(--text)}
+.cell:hover .cell-tip{opacity:1}
+
+/* Responsive adjustments */
+@media(max-width:520px){
+  .board-wrap{padding:6px}
+  .cell{border-radius:5px}
+  .control-bar{padding:0.8rem}
+  .current-flag{font-size:1.4rem}
+  .dice-btn{width:52px;height:52px;font-size:1.5rem}
+}
+@media(min-width:700px){
+  .game-layout{grid-template-columns:1fr 220px}
+  .board-col{grid-column:1;grid-row:1/4}
+  .players-col{grid-column:2;grid-row:1}
+}
+
+/* Wild modal special */
+.wild-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem}
+.wild-opt{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px 10px;cursor:pointer;text-align:center;transition:all 0.18s;color:var(--text)}
+.wild-opt:hover{border-color:#c084fc;background:var(--purple-soft);transform:translateY(-2px)}
+.wild-num{font-family:'Archivo Black',sans-serif;font-size:1.6rem;color:#c084fc}
+.wild-lbl{font-size:0.68rem;color:var(--text2);margin-top:2px}
+
+/* Step headers */
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:1.75rem}
+
+/* Shiny finish cell */
+@keyframes shimmer{0%,100%{box-shadow:0 0 8px rgba(240,180,41,0.3)}50%{box-shadow:0 0 18px rgba(240,180,41,0.6)}}
+.cell-finish{animation:shimmer 2.5s ease-in-out infinite}
+
+/* Particle confetti */
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:450;overflow:hidden}
+.confetti-p{position:absolute;width:8px;height:8px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const COUNTRIES = [
+  {id:'bra',name:'Brasil',flag:'🇧🇷'},{id:'arg',name:'Argentina',flag:'🇦🇷'},
+  {id:'fra',name:'França',flag:'🇫🇷'},{id:'eng',name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+  {id:'esp',name:'Espanha',flag:'🇪🇸'},{id:'por',name:'Portugal',flag:'🇵🇹'},
+  {id:'ger',name:'Alemanha',flag:'🇩🇪'},{id:'ned',name:'Holanda',flag:'🇳🇱'},
+  {id:'ita',name:'Itália',flag:'🇮🇹'},{id:'usa',name:'EUA',flag:'🇺🇸'},
+  {id:'mex',name:'México',flag:'🇲🇽'},{id:'jap',name:'Japão',flag:'🇯🇵'},
+  {id:'aus',name:'Austrália',flag:'🇦🇺'},{id:'mar',name:'Marrocos',flag:'🇲🇦'},
+  {id:'cro',name:'Croácia',flag:'🇭🇷'},{id:'sen',name:'Senegal',flag:'🇸🇳'},
+  {id:'bel',name:'Bélgica',flag:'🇧🇪'},{id:'uru',name:'Uruguai',flag:'🇺🇾'},
+  {id:'col',name:'Colômbia',flag:'🇨🇴'},{id:'qat',name:'Qatar',flag:'🇶🇦'},
+];
+
+const QUIZ_DB = [
+  {q:'Qual país sediou a Copa do Mundo de 2022?',a:'Qatar',opts:['Rússia','Qatar','Brasil','Emirados'],cat:'sede'},
+  {q:'Quem foi campeão da Copa do Mundo de 2022?',a:'Argentina',opts:['França','Argentina','Marrocos','Croácia'],cat:'campeão'},
+  {q:'Quem foi artilheiro da Copa de 2022?',a:'Mbappé',opts:['Messi','Neymar','Mbappé','Benzema'],cat:'artilheiro'},
+  {q:'Quantos gols Mbappé marcou na final de 2022?',a:'3',opts:['1','2','3','4'],cat:'estatística'},
+  {q:'Qual seleção africana chegou às semifinais em 2022?',a:'Marrocos',opts:['Senegal','Gana','Marrocos','Camarões'],cat:'surpresa'},
+  {q:'Quem ganhou a Copa do Mundo de 2018?',a:'França',opts:['Croácia','França','Bélgica','Uruguai'],cat:'campeão'},
+  {q:'Qual país sediou a Copa do Mundo de 2018?',a:'Rússia',opts:['Alemanha','Rússia','Qatar','EUA'],cat:'sede'},
+  {q:'Quantas vezes o Brasil ganhou a Copa do Mundo?',a:'5',opts:['4','5','6','3'],cat:'história'},
+  {q:'Em que ano o Brasil foi goleado 7x1 pela Alemanha?',a:'2014',opts:['2010','2012','2014','2016'],cat:'história'},
+  {q:'Qual país tem mais títulos na Copa do Mundo?',a:'Brasil',opts:['Alemanha','Brasil','Itália','Argentina'],cat:'história'},
+  {q:'Em que ano Pelé venceu sua primeira Copa do Mundo?',a:'1958',opts:['1954','1958','1962','1966'],cat:'lenda'},
+  {q:'Qual jogador marcou gol de bicicleta famoso na Copa 2018?',a:'Cristiano Ronaldo',opts:['Neymar','Messi','Cristiano Ronaldo','Mbappé'],cat:'golaço'},
+  {q:'Qual país sediou a Copa do Mundo de 2014?',a:'Brasil',opts:['Brasil','África do Sul','Argentina','Alemanha'],cat:'sede'},
+  {q:'Quantas seleções participam da Copa a partir de 2026?',a:'48',opts:['32','40','48','64'],cat:'formato'},
+  {q:'Qual foi o placar da final de 2022 após prorrogação?',a:'3x3',opts:['2x2','3x3','4x2','2x1'],cat:'placar'},
+  {q:'Onde será a Copa do Mundo de 2026?',a:'EUA, Canadá e México',opts:['Austrália','EUA, Canadá e México','Arábia Saudita','Japão'],cat:'sede'},
+  {q:'Quem foi eleito melhor goleiro da Copa 2022?',a:'Emiliano Martínez',opts:['Lloris','Bounou','Emiliano Martínez','Alisson'],cat:'prêmio'},
+  {q:'Quem venceu a Copa de 2010 na África do Sul?',a:'Espanha',opts:['Brasil','Holanda','Espanha','Alemanha'],cat:'campeão'},
+  {q:'Quantos títulos a Alemanha tem na Copa?',a:'4',opts:['3','4','5','2'],cat:'história'},
+  {q:'Qual jogador ganhou a Bola de Ouro na Copa 2022?',a:'Messi',opts:['Mbappé','Messi','Modric','Benzema'],cat:'prêmio'},
+  {q:'Em que Copa Ronaldo Fenômeno foi artilheiro com 8 gols?',a:'2002',opts:['1998','2002','2006','1994'],cat:'artilheiro'},
+  {q:'Qual time venceu a Copa de 2006 na Alemanha?',a:'Itália',opts:['França','Itália','Alemanha','Portugal'],cat:'campeão'},
+  {q:'Qual foi o gol mais rápido da história das Copas?',a:'11 segundos - Hakan Şükür',opts:['15 segundos - Maxi Rodriguez','11 segundos - Hakan Şükür','23 segundos - Clint Dempsey','8 segundos - desconhecido'],cat:'recorde'},
+  {q:'Qual goleiro defendeu pênalti na final de 2006?',a:'Buffon',opts:['Casillas','Buffon','Toldo','Seaman'],cat:'goleiro'},
+  {q:'Em que edição da Copa o Brasil foi pentacampeão?',a:'2002',opts:['1994','1998','2002','2006'],cat:'campeão'},
+  {q:'Qual jogador marcou mais gols na história das Copas?',a:'Miroslav Klose',opts:['Ronaldo','Gerd Müller','Miroslav Klose','Pelé'],cat:'recorde'},
+];
+
+const BOARD_SIZE = 70;
+const COLS = 10;
+const ROWS = Math.ceil(BOARD_SIZE / COLS); // 7
+
+// Build cell types
+function buildCells() {
+  const types = Array(BOARD_SIZE).fill('normal');
+  types[0] = 'start';
+  types[BOARD_SIZE-1] = 'finish';
+  // quiz every ~7 cells
+  [6,13,20,27,34,41,48,55,62].forEach(i => { if(i < BOARD_SIZE-1) types[i]='quiz'; });
+  // bonus
+  [9,23,38,52,66].forEach(i => { if(i < BOARD_SIZE-1) types[i]='bonus'; });
+  // penalty
+  [17,30,45,58].forEach(i => { if(i < BOARD_SIZE-1) types[i]='penalty'; });
+  // wild
+  [25,43,60].forEach(i => { if(i < BOARD_SIZE-1) types[i]='wild'; });
+  // dribble (skip 1 turn)
+  [11,35,50].forEach(i => { if(i < BOARD_SIZE-1) types[i]='dribble'; });
+  return types;
+}
+const CELL_TYPES = buildCells();
+
+const CELL_META = {
+  normal:   {icon:'',cls:'cell-n',tip:''},
+  start:    {icon:'🏟',cls:'cell-start',tip:'Início!'},
+  finish:   {icon:'🏆',cls:'cell-finish',tip:'Fim — Campeão!'},
+  quiz:     {icon:'❓',cls:'cell-quiz',tip:'Quiz +20pts'},
+  bonus:    {icon:'⚽',cls:'cell-bonus',tip:'GOL! +2 casas'},
+  penalty:  {icon:'🟥',cls:'cell-penalty',tip:'Falta! -2 casas'},
+  wild:     {icon:'📺',cls:'cell-wild',tip:'VAR — escolha!'},
+  dribble:  {icon:'🌀',cls:'cell-dribble',tip:'Drible — pule 1 turno!'},
+};
+
+const DICE_ICONS = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+const P_COLORS   = ['#f0b429','#06b6d4','#f87171','#a78bfa'];
+const RANK_ICONS = ['🥇','🥈','🥉','4️⃣'];
+const STORAGE_KEY = 'wcbg_v3';
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let S = {
+  screen: 'home',       // home | setup | game | ranking
+  setupStep: 0,         // 0=num,1=names,2+= pick country
+  numPlayers: 2,
+  playerNames: ['Jogador 1','Jogador 2','Jogador 3','Jogador 4'],
+  selectedCountries: [], // [{playerIdx, country}]
+  players: [],
+  game: null,
+  rankings: [],
+  toast: null,
+  toastTimer: null,
+  modal: null,
+  quiz: null,
+  loadingAI: false,
+  diceRolling: false,
+  lastDice: 0,
+};
+
+try { S.rankings = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch{}
+
+function setState(patch) {
+  Object.assign(S, patch);
+  render();
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function showToast(msg, type='info', dur=2600) {
+  if(S.toastTimer) clearTimeout(S.toastTimer);
+  S.toast = {msg, type};
+  const t = setTimeout(()=>{ S.toast=null; render(); }, dur);
+  S.toastTimer = t;
+  render();
+}
+
+function saveRankings() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S.rankings)); } catch{}
+}
+
+function playerColor(i) { return P_COLORS[i % P_COLORS.length]; }
+
+// Serpentine board index → {row, col} in display grid
+function cellDisplay(idx) {
+  const row = Math.floor(idx / COLS);
+  const col = (row % 2 === 0) ? (idx % COLS) : (COLS - 1 - (idx % COLS));
+  return { row: ROWS - 1 - row, col };
+}
+
+function confetti() {
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti-wrap';
+  document.body.appendChild(wrap);
+  const colors = ['#f0b429','#22c55e','#3b82f6','#a855f7','#ef4444','#06b6d4'];
+  for(let i=0;i<60;i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-p';
+    p.style.cssText = `left:${Math.random()*100}%;background:${colors[i%colors.length]};animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;transform:scale(${0.5+Math.random()})`;
+    wrap.appendChild(p);
+  }
+  setTimeout(()=>wrap.remove(), 4000);
+}
+
+// ══════════════════════════════════════════
+// GAME LOGIC
+// ══════════════════════════════════════════
+function startGame() {
+  const players = Array.from({length:S.numPlayers}, (_,i) => {
+    const sc = S.selectedCountries.find(s=>s.playerIdx===i);
+    return {
+      id:i,
+      name: S.playerNames[i] || `Jogador ${i+1}`,
+      country: sc ? sc.country : COUNTRIES[i],
+      position: 0, score: 0,
+      quizOk: 0, quizTotal: 0,
+      color: playerColor(i),
+      skipTurn: false,
+    };
+  });
+  setState({
+    screen:'game',
+    players,
+    game: { currentPlayer:0, turn:1 },
+    quiz: null, loadingAI: false,
+    diceRolling: false, lastDice: 0,
+    modal: null,
+  });
+}
+
+function rollDice() {
+  if(S.diceRolling || S.quiz || S.loadingAI) return;
+  const cp = S.game.currentPlayer;
+  const player = S.players[cp];
+
+  // Check skip
+  if(player.skipTurn) {
+    showToast(`${player.name} perdeu a vez por drible! 🌀`, 'bad');
+    S.players[cp] = {...player, skipTurn: false};
+    nextTurn();
+    return;
+  }
+
+  setState({diceRolling:true});
+  let count = 0;
+  const iv = setInterval(()=>{
+    S.lastDice = Math.floor(Math.random()*6);
+    render();
+    count++;
+    if(count >= 10) {
+      clearInterval(iv);
+      const final = Math.floor(Math.random()*6);
+      S.lastDice = final;
+      S.diceRolling = false;
+      handleMove(cp, final+1);
+    }
+  }, 55);
+}
+
+function handleMove(cp, steps) {
+  const player = S.players[cp];
+  const newPos = Math.min(player.position + steps, BOARD_SIZE-1);
+  S.players = S.players.map((p,i) => i===cp ? {...p, position:newPos} : p);
+
+  if(newPos === BOARD_SIZE-1) {
+    render();
+    setTimeout(()=>endGame(cp), 400);
+    return;
+  }
+
+  const type = CELL_TYPES[newPos];
+  render();
+
+  if(type==='quiz') {
+    setTimeout(triggerQuiz, 350);
+  } else if(type==='bonus') {
+    showToast('⚽ GOL! Avança 2 casas extra!', 'good');
+    setTimeout(()=>{
+      S.players = S.players.map((p,i)=>i===cp?{...p,position:Math.min(p.position+2,BOARD_SIZE-1),score:p.score+10}:p);
+      nextTurn();
+    }, 1300);
+  } else if(type==='penalty') {
+    showToast('🟥 Falta! Volta 2 casas!', 'bad');
+    setTimeout(()=>{
+      S.players = S.players.map((p,i)=>i===cp?{...p,position:Math.max(0,p.position-2)}:p);
+      nextTurn();
+    }, 1300);
+  } else if(type==='wild') {
+    setState({modal:{type:'wild'}});
+  } else if(type==='dribble') {
+    showToast(`${player.name} foi driblado! Perde a próxima vez! 🌀`, 'bad', 3000);
+    S.players = S.players.map((p,i)=>i===cp?{...p,skipTurn:true}:p);
+    setTimeout(nextTurn, 1600);
+  } else {
+    setTimeout(nextTurn, 350);
+  }
+}
+
+function nextTurn() {
+  const next = (S.game.currentPlayer + 1) % S.numPlayers;
+  S.game = {...S.game, currentPlayer:next, turn:S.game.turn+1};
+  render();
+}
+
+async function triggerQuiz() {
+  setState({loadingAI:true, quiz:null});
+  const base = QUIZ_DB[Math.floor(Math.random()*QUIZ_DB.length)];
+  try {
+    const prompt = `Você é um árbitro especialista em Copa do Mundo. Crie uma pergunta de quiz INÉDITA sobre Copa do Mundo no tema "${base.cat}". Responda SOMENTE com JSON válido no formato: {"q":"...","a":"...","opts":["...","...","...","..."]} — sem markdown, sem texto extra. A resposta correta deve estar em opts. Use apenas fatos reais verificáveis.`;
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:350,messages:[{role:'user',content:prompt}]})
+    });
+    if(res.ok) {
+      const d = await res.json();
+      const txt = (d.content||[]).map(c=>c.text||'').join('');
+      const m = txt.match(/\{[\s\S]*?\}/);
+      if(m) {
+        const p = JSON.parse(m[0]);
+        if(p.q && p.a && Array.isArray(p.opts) && p.opts.length===4 && p.opts.includes(p.a)) {
+          setState({loadingAI:false, quiz:{...p, answered:false, selected:null, ai:true}});
+          return;
+        }
+      }
+    }
+  } catch(e) {}
+  // fallback
+  const q = QUIZ_DB[Math.floor(Math.random()*QUIZ_DB.length)];
+  setState({loadingAI:false, quiz:{...q, answered:false, selected:null, ai:false}});
+}
+
+function answerQuiz(opt) {
+  if(!S.quiz || S.quiz.answered) return;
+  const correct = opt === S.quiz.a;
+  const cp = S.game.currentPlayer;
+  S.quiz = {...S.quiz, answered:true, selected:opt};
+  S.players = S.players.map((p,i)=>i===cp?{
+    ...p,
+    quizOk: p.quizOk + (correct?1:0),
+    quizTotal: p.quizTotal + 1,
+    score: p.score + (correct?20:0),
+    position: correct ? Math.min(p.position+2,BOARD_SIZE-1) : Math.max(0,p.position-1),
+  }:p);
+  showToast(correct ? '✅ Correto! +20pts e avança 2!' : '❌ Errado! Volta 1 casa', correct?'good':'bad');
+  render();
+  setTimeout(()=>{ S.quiz=null; nextTurn(); }, 2400);
+}
+
+function wildChoice(extra) {
+  const cp = S.game.currentPlayer;
+  S.players = S.players.map((p,i)=>i===cp?{...p,position:Math.min(p.position+extra,BOARD_SIZE-1)}:p);
+  S.modal = null;
+  showToast(`📺 VAR: Avança ${extra} casas!`, 'info');
+  setTimeout(nextTurn, 600);
+}
+
+function endGame(winnerId) {
+  confetti();
+  const winner = S.players[winnerId];
+  const sorted = [...S.players].sort((a,b)=>b.score-a.score);
+  const entry = {
+    winner: winner.name, country: winner.country.name, flag: winner.country.flag,
+    score: winner.score, players: S.numPlayers, date: new Date().toLocaleDateString('pt-BR'),
+  };
+  S.rankings = [entry, ...S.rankings].slice(0,30);
+  saveRankings();
+  setState({modal:{type:'gameover', winner, sorted}});
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function render() {
+  document.getElementById('app').innerHTML = buildHTML();
+  attachEvents();
+}
+
+function buildHTML() {
+  return `
+    ${buildToast()}
+    ${S.modal ? buildModal() : ''}
+    ${S.screen==='home'    ? buildHome()    : ''}
+    ${S.screen==='setup'   ? buildSetup()   : ''}
+    ${S.screen==='game'    ? buildGame()    : ''}
+    ${S.screen==='ranking' ? buildRanking() : ''}
+  `;
+}
+
+// ── HOME ──────────────────────────────────
+function buildHome() {
+  return `
+  <div class="screen home-bg" style="justify-content:flex-start;padding-top:0">
+    <div class="home-hero">
+      <div class="trophy-wrap">🏆</div>
+      <div class="heading h1" style="color:var(--gold)">Copa do Mundo</div>
+      <div class="heading h2" style="color:var(--text);margin-top:4px">Jogo de Tabuleiro</div>
+      <div class="home-tagline">Multiplayer • Quiz com IA • 70 Casas • Ranking Global</div>
+      <div class="home-actions">
+        <button class="btn btn-gold btn-lg w100" id="btn-newgame">🏟 &nbsp;Nova Partida</button>
+        <button class="btn btn-ghost btn-lg w100" id="btn-ranking">🏆 &nbsp;Ranking (${S.rankings.length})</button>
+      </div>
+      <div class="home-stats">
+        <div class="stat-pill"><div class="stat-val">2–4</div><div class="stat-key">Jogadores</div></div>
+        <div class="stat-pill"><div class="stat-val">70</div><div class="stat-key">Casas</div></div>
+        <div class="stat-pill"><div class="stat-val">IA</div><div class="stat-key">Quiz</div></div>
+      </div>
+      <div class="cell-legend">
+        <div class="legend-item"><span>❓</span> Quiz +20pts</div>
+        <div class="legend-item"><span>⚽</span> Gol +2 casas</div>
+        <div class="legend-item"><span>🟥</span> Falta -2 casas</div>
+        <div class="legend-item"><span>📺</span> VAR escolha</div>
+        <div class="legend-item"><span>🌀</span> Drible perde vez</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── SETUP ─────────────────────────────────
+function buildSetup() {
+  if(S.setupStep === 0) return buildSetupNum();
+  if(S.setupStep === 1) return buildSetupNames();
+  return buildSetupCountry();
+}
+
+function buildSetupNum() {
+  return `
+  <div class="screen">
+    <div class="setup-wrap">
+      <div class="page-header">
+        <button class="btn btn-outline btn-sm" id="btn-back-home">← Voltar</button>
+        <div>
+          <div class="heading h3">Nova Partida</div>
+          <div style="color:var(--text2);font-size:0.82rem;margin-top:2px">Quantos jogadores?</div>
+        </div>
+      </div>
+      <div class="num-sel">
+        ${[2,3,4].map(n=>`<button class="num-btn${S.numPlayers===n?' active':''}" data-num="${n}">${n}</button>`).join('')}
+      </div>
+      <button class="btn btn-gold btn-lg w100" id="btn-to-names">Continuar →</button>
+    </div>
+  </div>`;
+}
+
+function buildSetupNames() {
+  const rows = Array.from({length:S.numPlayers},(_,i)=>`
+    <div class="player-row">
+      <div class="pdot" style="background:${playerColor(i)};color:#000">${i+1}</div>
+      <input class="name-input" data-pidx="${i}" value="${esc(S.playerNames[i])}" placeholder="Jogador ${i+1}" maxlength="18">
+    </div>`).join('');
+  return `
+  <div class="screen">
+    <div class="setup-wrap">
+      <div class="page-header">
+        <button class="btn btn-outline btn-sm" id="btn-back-num">← Voltar</button>
+        <div>
+          <div class="heading h3">Nomes dos Jogadores</div>
+          <div style="color:var(--text2);font-size:0.82rem;margin-top:2px">${S.numPlayers} jogadores</div>
+        </div>
+      </div>
+      ${rows}
+      <button class="btn btn-gold btn-lg w100" style="margin-top:1.5rem" id="btn-to-countries">Escolher Países →</button>
+    </div>
+  </div>`;
+}
+
+function buildSetupCountry() {
+  const pidx = S.setupStep - 2;
+  const sel = S.selectedCountries.find(s=>s.playerIdx===pidx)?.country;
+  const total = S.numPlayers;
+  const dots = Array.from({length:total},(_,i)=>`<div class="step-dot${i<pidx?'done':i===pidx?'active':''}"></div>`).join('');
+  const cards = COUNTRIES.map(c=>{
+    const taken = S.selectedCountries.some(s=>s.country.id===c.id && s.playerIdx!==pidx);
+    const isSel = sel?.id===c.id;
+    return `<button class="country-card${isSel?' sel':''}" ${taken?'disabled':''} data-cid="${c.id}">
+      <div class="country-flag">${c.flag}</div>
+      <div class="country-name">${c.name}</div>
+      ${taken?'<div style="font-size:0.6rem;color:var(--text3);margin-top:3px">Ocupado</div>':''}
+    </button>`;
+  }).join('');
+
+  const isLast = pidx === total-1;
+  const canNext = !!sel;
+
+  return `
+  <div class="screen" style="justify-content:flex-start;padding-top:1rem">
+    <div class="setup-wrap">
+      <div class="page-header">
+        <button class="btn btn-outline btn-sm" id="btn-back-country">← Voltar</button>
+        <div style="flex:1">
+          <div class="heading h3">Escolha o País</div>
+          <div style="color:var(--text2);font-size:0.82rem;margin-top:2px">
+            <span style="color:${playerColor(pidx)};font-weight:600">${esc(S.playerNames[pidx])}</span>
+            ${sel?`<span class="badge badge-green" style="margin-left:8px">✓ ${sel.flag} ${sel.name}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="step-bar">${dots}</div>
+      <div class="country-grid">${cards}</div>
+      ${isLast
+        ? `<button class="btn btn-green btn-lg w100" ${canNext?'':'disabled'} id="btn-start-game">🏟 Iniciar Partida!</button>`
+        : `<button class="btn btn-gold btn-md w100" ${canNext?'':'disabled'} id="btn-next-country">Próximo →</button>`
+      }
+    </div>
+  </div>`;
+}
+
+// ── BOARD ─────────────────────────────────
+function buildBoard() {
+  // Build 7 rows × 10 cols serpentine
+  let html = '<div class="board-grid" style="grid-template-rows:repeat(7,1fr);gap:3px">';
+
+  for(let row=0; row<ROWS; row++) {
+    html += '<div class="board-row" style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px">';
+    for(let col=0; col<COLS; col++) {
+      // Serpentine: even rows L→R, odd rows R→L (in display, row 0 is top = last logical row)
+      const logicalRow = ROWS - 1 - row;
+      const logicalCol = (logicalRow % 2 === 0) ? col : (COLS-1-col);
+      const idx = logicalRow * COLS + logicalCol;
+      if(idx >= BOARD_SIZE) { html += '<div></div>'; continue; }
+
+      const type = CELL_TYPES[idx];
+      const meta = CELL_META[type];
+      const here = S.players.filter(p=>p.position===idx);
+      const tokens = here.map(p=>
+        `<div class="token" style="background:${p.color};width:clamp(9px,2vw,15px);height:clamp(9px,2vw,15px)"></div>`
+      ).join('');
+
+      html += `<div class="cell ${meta.cls}" title="${meta.tip}">
+        ${meta.tip?`<div class="cell-tip">${meta.tip}</div>`:''}
+        ${meta.icon
+          ? `<div class="cell-icon">${meta.icon}</div>`
+          : `<div class="cell-num">${idx+1}</div>`}
+        ${tokens?`<div class="tokens-layer">${tokens}</div>`:''}
+      </div>`;
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── GAME ──────────────────────────────────
+function buildGame() {
+  const g = S.game;
+  const cp = S.players[g.currentPlayer];
+  const sorted = [...S.players].sort((a,b)=>b.score-a.score);
+
+  const playersStrip = S.players.map((p,i)=>`
+    <div class="pcard${i===g.currentPlayer?' current':''}">
+      <div class="pdot" style="background:${p.color};color:#000">${p.country.flag}</div>
+      <span class="pname">${esc(p.name)}</span>
+      <span class="pscore">${p.score}</span>
+    </div>`).join('');
+
+  const scoreboard = sorted.map((p,i)=>{
+    const pct = Math.round((p.position/(BOARD_SIZE-1))*100);
+    return `<div class="score-row${i===0?' lead':''}">
+      <span class="score-rank">${RANK_ICONS[i]||`${i+1}º`}</span>
+      <span class="score-flag">${p.country.flag}</span>
+      <span class="score-name">${esc(p.name)}</span>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span class="score-pts">${p.score}pts</span>
+    </div>`;
+  }).join('');
+
+  const quizPanel = S.loadingAI ? `
+    <div class="quiz-panel">
+      <div class="ai-loading">
+        <div class="ai-pulse">🤖</div>
+        <div>
+          <div style="font-weight:600;color:#60a5fa">Gerando pergunta com IA…</div>
+          <div style="font-size:0.78rem;color:var(--text2);margin-top:2px">Claude está pensando…</div>
+        </div>
+      </div>
+    </div>` : S.quiz ? buildQuizPanel() : '';
+
+  const canRoll = !S.diceRolling && !S.quiz && !S.loadingAI;
+  const controlBar = (!S.quiz && !S.loadingAI) ? `
+    <div class="control-bar">
+      <div class="current-info">
+        <div class="current-label">Vez de jogar</div>
+        <div class="current-player">
+          <div class="current-flag">${cp.country.flag}</div>
+          <div>
+            <div class="current-name">${esc(cp.name)}</div>
+            <div class="current-meta">Casa ${cp.position+1}/70 &nbsp;•&nbsp; ${cp.score}pts &nbsp;•&nbsp; ❓ ${cp.quizOk}/${cp.quizTotal}</div>
+          </div>
+        </div>
+      </div>
+      <div class="dice-area">
+        <div class="dice-face">${DICE_ICONS[S.lastDice]}</div>
+        <div class="dice-btn${S.diceRolling?' spinning':''}" id="btn-roll" title="Rolar dado">🎲</div>
+      </div>
+    </div>` : '';
+
+  return `
+  <div class="screen" style="justify-content:flex-start;padding:0.6rem 0.75rem">
+    <div class="game-topbar">
+      <div class="topbar-brand">⚽ COPA DO MUNDO</div>
+      <div class="topbar-right">
+        <div class="turn-pill">Turno ${g.turn}</div>
+        <button class="btn btn-outline btn-xs" id="btn-quit">Sair</button>
+      </div>
+    </div>
+
+    <div class="players-strip" style="margin-bottom:8px">${playersStrip}</div>
+
+    <div style="width:100%;max-width:900px">
+      <div class="board-wrap" style="margin-bottom:8px">${buildBoard()}</div>
+      ${quizPanel}
+      ${controlBar}
+      <div class="scoreboard" style="margin-top:8px">${scoreboard}</div>
+    </div>
+  </div>`;
+}
+
+function buildQuizPanel() {
+  const q = S.quiz;
+  const letters = ['A','B','C','D'];
+  const opts = q.opts.map((opt,i)=>`
+    <button class="opt-btn${q.answered&&opt===q.a?' correct':q.answered&&opt===q.selected&&opt!==q.a?' wrong':''}"
+      data-letter="${letters[i]}" data-opt="${i}" ${q.answered?'disabled':''}>
+      ${esc(opt)}
+    </button>`).join('');
+
+  return `
+  <div class="quiz-panel" style="margin-bottom:8px">
+    <div class="quiz-header">
+      <span class="badge badge-blue">❓ Quiz</span>
+      ${q.ai?'<span class="badge badge-purple">🤖 IA</span>':''}
+      <span style="margin-left:auto;font-size:0.75rem;color:var(--text2)">
+        ${esc(S.players[S.game.currentPlayer].name)} • Acerto: +20pts, avança 2 | Erro: -1 casa
+      </span>
+    </div>
+    <div class="quiz-q">${esc(q.q)}</div>
+    <div class="quiz-opts">${opts}</div>
+  </div>`;
+}
+
+// ── RANKING ───────────────────────────────
+function buildRanking() {
+  const items = S.rankings.length === 0
+    ? `<div style="text-align:center;padding:3rem 1rem;color:var(--text2)">
+        <div style="font-size:2.5rem;margin-bottom:1rem">🏆</div>
+        <div style="font-weight:600">Sem partidas ainda</div>
+        <div style="font-size:0.85rem;margin-top:4px">Jogue e apareça aqui!</div>
+       </div>`
+    : S.rankings.map((r,i)=>`
+      <div class="rank-item">
+        <div class="rank-medal">${i<4?RANK_ICONS[i]:`${i+1}º`}</div>
+        <div class="rank-flag">${r.flag}</div>
+        <div class="rank-info">
+          <div class="rank-name">${esc(r.winner)}</div>
+          <div class="rank-meta">${esc(r.country)} &nbsp;•&nbsp; ${r.players}👥 &nbsp;•&nbsp; ${r.date}</div>
+        </div>
+        <div class="rank-pts">${r.score}pts</div>
+      </div>`).join('');
+
+  return `
+  <div class="screen" style="justify-content:flex-start;padding-top:1rem">
+    <div class="rank-screen">
+      <div class="page-header">
+        <button class="btn btn-outline btn-sm" id="btn-back-rank">← Voltar</button>
+        <div>
+          <div class="heading h3">Ranking Global</div>
+          <div style="color:var(--text2);font-size:0.8rem">${S.rankings.length} partidas registradas</div>
+        </div>
+        ${S.rankings.length>0?`<button class="btn btn-red btn-xs" id="btn-clear-rank" style="margin-left:auto">Limpar</button>`:''}
+      </div>
+      <div class="flex col gap6">${items}</div>
+    </div>
+  </div>`;
+}
+
+// ── MODAL ─────────────────────────────────
+function buildModal() {
+  const m = S.modal;
+  if(m.type==='wild') return `
+    <div class="overlay">
+      <div class="modal">
+        <div class="modal-icon">📺</div>
+        <div class="modal-title" style="color:#c084fc">VAR em Ação!</div>
+        <div class="modal-sub">O árbitro consulta o vídeo — escolha quantas casas avançar</div>
+        <div class="wild-grid">
+          ${[1,2,3,4,5,6].map(n=>`
+            <div class="wild-opt" data-wild="${n}">
+              <div class="wild-num">${n}</div>
+              <div class="wild-lbl">casa${n>1?'s':''}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+
+  if(m.type==='gameover') {
+    const rows = m.sorted.map((p,i)=>`
+      <div class="score-row${i===0?' lead':''}">
+        <span class="score-rank">${RANK_ICONS[i]||`${i+1}º`}</span>
+        <span class="score-flag">${p.country.flag}</span>
+        <span class="score-name">${esc(p.name)}</span>
+        <span style="font-size:0.72rem;color:var(--text2)">❓${p.quizOk}/${p.quizTotal}</span>
+        <span class="score-pts">${p.score}pts</span>
+      </div>`).join('');
+    return `
+      <div class="overlay">
+        <div class="modal">
+          <div class="modal-icon">🏆</div>
+          <div class="modal-title" style="color:var(--gold)">CAMPEÃO!</div>
+          <div style="text-align:center;font-size:2rem;margin:8px 0">${m.winner.country.flag}</div>
+          <div class="modal-sub" style="font-size:1rem;font-weight:600;color:var(--text)">${esc(m.winner.name)} — ${esc(m.winner.country.name)}</div>
+          <div class="modal-sub">${m.winner.score} pontos</div>
+          <div class="modal-divider"></div>
+          <div class="flex col gap6" style="margin-bottom:1.5rem">${rows}</div>
+          <div class="flex gap8">
+            <button class="btn btn-ghost btn-md" style="flex:1" id="btn-new-after">Nova Partida</button>
+            <button class="btn btn-gold btn-md" style="flex:1" id="btn-home-after">Início</button>
+          </div>
+        </div>
+      </div>`;
+  }
+  return '';
+}
+
+// ── TOAST ─────────────────────────────────
+function buildToast() {
+  if(!S.toast) return '';
+  return `<div class="toast-wrap"><div class="toast ${S.toast.type||''}">${esc(S.toast.msg)}</div></div>`;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════
+// EVENTS
+// ══════════════════════════════════════════
+function attachEvents() {
+  const $ = id => document.getElementById(id);
+  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+
+  // HOME
+  on($('btn-newgame'), 'click', ()=>setState({screen:'setup',setupStep:0}));
+  on($('btn-ranking'), 'click', ()=>setState({screen:'ranking'}));
+
+  // SETUP
+  on($('btn-back-home'), 'click', ()=>setState({screen:'home'}));
+  on($('btn-to-names'), 'click', ()=>setState({setupStep:1}));
+  on($('btn-back-num'), 'click', ()=>setState({setupStep:0}));
+  on($('btn-to-countries'), 'click', ()=>{
+    // save names
+    document.querySelectorAll('.name-input').forEach(inp=>{
+      S.playerNames[+inp.dataset.pidx] = inp.value || `Jogador ${+inp.dataset.pidx+1}`;
+    });
+    setState({setupStep:2});
+  });
+  on($('btn-back-country'), 'click', ()=>{
+    const pidx = S.setupStep - 2;
+    setState({setupStep: pidx===0 ? 1 : S.setupStep-1});
+  });
+  on($('btn-next-country'), 'click', ()=>setState({setupStep:S.setupStep+1}));
+  on($('btn-start-game'), 'click', startGame);
+
+  document.querySelectorAll('.num-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>setState({numPlayers:+btn.dataset.num}));
+  });
+  document.querySelectorAll('.name-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      S.playerNames[+e.target.dataset.pidx] = e.target.value;
+    });
+  });
+  document.querySelectorAll('.country-card:not(:disabled)').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const pidx = S.setupStep - 2;
+      const cid = btn.dataset.cid;
+      const country = COUNTRIES.find(c=>c.id===cid);
+      S.selectedCountries = S.selectedCountries.filter(s=>s.playerIdx!==pidx);
+      S.selectedCountries.push({playerIdx:pidx, country});
+      render();
+    });
+  });
+
+  // GAME
+  on($('btn-roll'), 'click', rollDice);
+  on($('btn-quit'), 'click', ()=>{ if(confirm('Sair da partida atual?')) setState({screen:'home',modal:null,quiz:null}); });
+  document.querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>answerQuiz(S.quiz.opts[+btn.dataset.opt]));
+  });
+  document.querySelectorAll('.wild-opt').forEach(el=>{
+    el.addEventListener('click', ()=>wildChoice(+el.dataset.wild));
+  });
+
+  // GAMEOVER modal
+  on($('btn-new-after'), 'click', ()=>setState({screen:'setup',setupStep:0,modal:null}));
+  on($('btn-home-after'), 'click', ()=>setState({screen:'home',modal:null}));
+
+  // RANKING
+  on($('btn-back-rank'), 'click', ()=>setState({screen:'home'}));
+  on($('btn-clear-rank'), 'click', ()=>{
+    if(confirm('Limpar todo o ranking?')) { S.rankings=[]; saveRankings(); render(); }
+  });
+}
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
